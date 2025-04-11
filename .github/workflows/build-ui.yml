@@ -1,0 +1,43 @@
+name: Node.js CI
+
+on:
+  push:
+
+    branches: [ "master" ]
+
+
+jobs:
+  build-bookmarker-ui:
+
+    name: Build bookmarker-ui
+    runs-on: ubuntu-latest
+    #    defaults:
+    #      run:
+    #	    working-directory: ./bookmarker-ui-nextjs
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: bookmarker-ui-nextjs/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Test
+        run: npm test
+
+      - if: ${{ github.ref == 'refs/heads/master' }}
+        name: Build and Publish Docker Image
+        run: |
+            docker build -t ${{ secrets.DOCKER_USERNAME }}/bookmarker-ui-nextjs .
+            docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+            docker push ${{ secrets.DOCKER_USERNAME }}/bookmarker-ui-nextjs
