@@ -1,12 +1,20 @@
 version: '3.8'
+
 services:
   bookmarker-ui-nextjs:
-    container_name: bookmarker-ui-nextjs
     build:
-
+      context: .
       dockerfile: Dockerfile
+    container_name: bookmarker-ui-nextjs
     ports:
       - "13000:3000"
     environment:
       SERVER_SIDE_API_BASE_URL: http://bookmarker-api:8080
       CLIENT_SIDE_API_BASE_URL: http://localhost:18080
+
+    networks:
+      - bookmarker-network
+
+networks:
+  bookmarker-network:
+    external: true
